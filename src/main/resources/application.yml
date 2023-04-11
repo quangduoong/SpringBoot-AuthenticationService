@@ -1,0 +1,34 @@
+application:
+  security:
+    jwt:
+      secret-key: 33743677397A24432646294A404E635266556A586E327234753778214125442A472D4B6150645367566B59703373367638792F423F4528482B4D6251655468576D5A7134743777217A24432646294A404E635266556A586E3272357538782F413F442A472D4B6150645367566B5970337336763979244226452948404D625165
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/content-calendar_user
+    username: root
+    password: quangduong
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+#      javax:
+#        persistence:
+#          schema-generation:
+#            scripts:
+#              action: create
+#              create-target: src/main/resources/db/migration/V1__init.sql
+#              create-source: metadata
+  flyway:
+    enabled: true
+    url: jdbc:mysql://localhost:3306/content-calendar_user
+    user: root
+    password: quangduong
+    locations: classpath:db/migration,filesystem:/opt/migration
+  devtools:
+    restart:
+      exclude: logs/**
