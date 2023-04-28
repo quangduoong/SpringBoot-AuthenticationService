@@ -1,9 +1,8 @@
 package contentcalendar.user.repo;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import contentcalendar.user.domain.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserRepo extends JpaRepository<User, Long> {
+public interface UserRepo extends MongoRepository<User, String> {
     User findByUsername(String username);
 }

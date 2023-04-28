@@ -1,30 +1,54 @@
 package contentcalendar.user.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import contentcalendar.user.domain.Role;
+import contentcalendar.user.domain.Token;
+import contentcalendar.user.domain.User;
+import contentcalendar.user.repo.RoleRepo;
+import contentcalendar.user.repo.TokenRepo;
+import contentcalendar.user.repo.UserRepo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import contentcalendar.user.domain.Role;
-import contentcalendar.user.domain.User;
-import contentcalendar.user.repo.RoleRepo;
-import contentcalendar.user.repo.UserRepo;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
-public class UserServiceImpl implements UserService ,UserDetailsService{
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
+    private final TokenRepo tokenRepo;
+
+    @Override
+    public void logout(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+             Authentication authentication) {
+        String authHeader = request.getHeader("Authorization");
+        String jwt;
+        Token token;
+
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            return;
+        jwt = authHeader.substring(7);
+        token = tokenRepo.findByToken(jwt).orElse(null);
+        if (token != null) {
+//            token.setExpired(true);
+//            token.setRevoked(true);
+            tokenRepo.delete(token);
+        }
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username)
@@ -38,7 +62,7 @@ public class UserServiceImpl implements UserService ,UserDetailsService{
             throw new UsernameNotFoundException(errorMessage);
         }
 
-        log.info("User" + username + " found.");
+        log.info("User " + username + " found.");
         user.getRoles().forEach(
                 role -> authorities
                         .add(new SimpleGrantedAuthority(role.getName())));
@@ -50,15 +74,15 @@ public class UserServiceImpl implements UserService ,UserDetailsService{
     }
 
     @Override
-    public User saveUser(User user) {
+    public void saveUser(User user) {
         log.info("Saving new user {} to db...", user.getName());
-        return userRepo.save(user);
+        userRepo.save(user);
     }
 
     @Override
-    public Role saveRole(Role role) {
+    public void saveRole(Role role) {
         log.info("Saving new role {} to db...", role.getName());
-        return roleRepo.save(role);
+        roleRepo.save(role);
     }
 
     @Override

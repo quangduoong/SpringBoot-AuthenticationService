@@ -1,14 +1,15 @@
 package contentcalendar.user.service;
 
-import java.util.List;
-
 import contentcalendar.user.domain.Role;
 import contentcalendar.user.domain.User;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-public interface UserService {
-    User saveUser(User user);
+import java.util.List;
 
-    Role saveRole(Role role);
+public interface UserService extends LogoutHandler {
+    void saveUser(User user);
+
+    void saveRole(Role role);
 
     void addRoleToUser(String username, String roleName);
 

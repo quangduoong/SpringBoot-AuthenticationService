@@ -1,5 +1,6 @@
 package contentcalendar.user.filter;
 
+import contentcalendar.user.repo.TokenRepo;
 import contentcalendar.user.service.JwtServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,8 +23,10 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtServiceImpl jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenRepo tokenRepo;
 
     @Override
     protected void doFilterInternal(
@@ -46,7 +49,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            boolean isTokenValid = tokenRepo.findByToken(jwt)
+                    .filter(token -> token.isExpired() && token.isRevoked())
+                    .isEmpty();
+
+            if (jwtService.isTokenAuthenticated(jwt, userDetails) && isTokenValid) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,

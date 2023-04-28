@@ -1,22 +1,18 @@
 package contentcalendar.user.controller;
 
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
-import contentcalendar.user.service.AuthenticationServiceImpl;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import contentcalendar.user.domain.Role;
 import contentcalendar.user.domain.User;
+import contentcalendar.user.service.AuthenticationServiceImpl;
 import contentcalendar.user.service.UserService;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/api")
 @RestController
@@ -55,13 +51,12 @@ public class UserController {
     @PostMapping("/auth/register")
     @ResponseStatus(code = HttpStatus.OK)
     public String register(@NonNull @RequestBody UserAuthRequest request){
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(
-                passwordEncoder.encode(request.getPassword())
-        );
-        user.setName("gi cung dc");
-        user.setId(UUID.randomUUID());
+        User user = User.builder()
+                .name(request.getName())
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
         return authenticationService.register(user);
     }
 
@@ -78,6 +73,7 @@ public class UserController {
 
     @Data
     private static final class UserAuthRequest {
+        private String name;
         private String username;
        private String password;
     }
