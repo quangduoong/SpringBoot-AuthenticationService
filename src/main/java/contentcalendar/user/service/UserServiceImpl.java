@@ -22,24 +22,26 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService ,UserDetailsService{
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
         User user = userRepo.findByUsername(username);
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
         if (user == null) {
-            String errorMessage = String.format("User %u not found", username);
+            String errorMessage = String.format("User %s not found", username);
             log.error(errorMessage);
             throw new UsernameNotFoundException(errorMessage);
         }
 
         log.info("User" + username + " found.");
         user.getRoles().forEach(
-                role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
+                role -> authorities
+                        .add(new SimpleGrantedAuthority(role.getName())));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
